@@ -52,10 +52,10 @@ class Image:
 		im_bin = Image()
 		
 		im_bin.set_pixels(np.zeros((self.H, self.W), dtype=np.uint8))
-		for i,row in enumerate(im_bin.pixels):
+		for i,row in enumerate(self.pixels):
 			for n, pix in enumerate(row):
-				if pix < S : im_bin.pixels[i][n] = 255
-				if pix >= S : im_bin.pixels[i][n] = 0
+				if pix >= S : im_bin.pixels[i][n] = 255
+				if pix < S : im_bin.pixels[i][n] = 0
 		
 		#pdb.set_trace()
 		return im_bin
@@ -71,19 +71,16 @@ class Image:
 	#==============================================================================
 	def localisation(self):
 		
-		pixY = [] ; pixX = []
-		lastPixY = None ; lastPixX = None
+		pixY = [self.H, 0] ; pixX = [self.W, 0]
 		for i,row in enumerate(self.pixels):
 			for n,pix in enumerate(row):
 				if pix == 0:
-					if lastPixY == None : pixY.append(i)
-					lastPixY = i
+					if i < pixY[0] : pixY[0] = i
+					if i > pixY[1] : pixY[1] = i
 				if pix == 0:
-					if lastPixX == None : pixX.append(n)
-					lastPixX = n
-		
-		pixY.append(lastPixY) ; pixX.append(lastPixX)
-		
+					if n < pixX[0] : pixX[0] = n
+					if n > pixX[1] : pixX[1] = n
+				
 		newImage = Image()
 		newImage.set_pixels(self.pixels[pixY[0]:pixY[1], pixX[0]:pixX[1]])
 		return newImage
@@ -91,13 +88,21 @@ class Image:
 	# Methode de redimensionnement d'image
 	#==============================================================================
 	def resize(self, new_H, new_W):
-		resizedimg = resize(self.localisation().pixels, (new_H,new_W), 0)
-		resizedimg.setPixels( np.uint8(resizedimg.pixels*255) )
+		resizedimg = Image()
+		resizedimg.set_pixels( np.uint8( resize(self.pixels, (new_H,new_W), 0)*255 ) ) 
 		return resizedimg
 
 	#==============================================================================
 	# Methode de mesure de similitude entre l'image self et un modele im
 	#==============================================================================
+
 	def similitude(self, im):
-		pass
+		samePix = 0
+		tot = 0
+		
+		for i,row in enumerate(self.pixels):
+			for n,pix in enumerate(row):
+				if pix == im.pixels[i][n] : samePix += 1
+				tot += 1
+		return samePix / tot
 
