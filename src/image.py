@@ -3,6 +3,8 @@ from skimage.transform import resize
 import matplotlib.pyplot as plt
 import numpy as np
 
+import pdb
+
 class Image:
 	def __init__(self):
 		"""Initialisation d'une image composee d'un tableau numpy 2D vide
@@ -49,9 +51,13 @@ class Image:
 	def binarisation(self, S):
 		im_bin = Image()
 		
-		pixCopy = np.copy(self.pixels) ; np.putmask(pixCopy, pixCopy <= S, 255) ; np.putmask(pixCopy, pixCopy > S, 0)
-		im_bin.set_pixels(pixCopy)
-
+		im_bin.set_pixels(np.zeros((self.H, self.W), dtype=np.uint8))
+		for i,row in enumerate(im_bin.pixels):
+			for n, pix in enumerate(row):
+				if pix < S : im_bin.pixels[i][n] = 255
+				if pix >= S : im_bin.pixels[i][n] = 0
+		
+		#pdb.set_trace()
 		return im_bin
 
 
